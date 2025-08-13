@@ -303,83 +303,45 @@ elif page == "🔍 Exploratory Analysis":
                      color_discrete_map={'Yes': '#FF6B6B', 'No': '#4ECDC4'})
         st.plotly_chart(fig, use_container_width=True)
 
-        st.subheader("📡 Service Usage & Plans")
+        
 
-        # Contract distribution (share %) - horizontal, narrow bars
-        if "Contract" in df.columns:
-            vc_contract = df["Contract"].value_counts(dropna=False).rename_axis("Contract").reset_index(name="count")
-            vc_contract["share"] = (vc_contract["count"] / vc_contract["count"].sum() * 100).round(1)
-            fig = px.bar(vc_contract.sort_values("share"), y="Contract", x="share", text="share",
-                         orientation="h", labels={"share": "Share (%)"},
-                         title="Contract Types (Share %)")
-            fig.update_traces(texttemplate="%{text}%", textposition="outside", marker_line_width=0.5,
-                              marker_line_color="#888")
-            fig.update_layout(**DEFAULT_LAYOUT, bargap=0.35,
-                              xaxis=dict(range=[0, max(60, vc_contract['share'].max() + 10)]))
-            st.plotly_chart(fig, use_container_width=True)
+        # Simplified Service Churn Analysis
+        cols_services = ["PhoneService", "MultipleLines", "InternetService", "OnlineSecurity", 
+                        "OnlineBackup", "DeviceProtection", "TechSupport", "StreamingTV", "StreamingMovies"]
 
-        cols_services = ["PhoneService", "MultipleLines", "InternetService", "OnlineSecurity", "OnlineBackup",
-                         "DeviceProtection", "TechSupport", "StreamingTV", "StreamingMovies"]
-        # Fix: Calculate churn split for customers having the service
-        # Clean churn share calculation for each service column
-        # ---- Churn share by service (100% of service users) ----
-        cols_services = [
-            "PhoneService", "MultipleLines", "InternetService", "OnlineSecurity", "OnlineBackup",
-            "DeviceProtection", "TechSupport", "StreamingTV", "StreamingMovies"
-        ]
         present = [c for c in cols_services if c in df.columns]
 
-
-        def has_service_mask(col_ser: pd.Series) -> pd.Series:
-            s = col_ser.astype(str).str.strip().str.lower()
-            # values that clearly mean ABSENCE of the service
-            negatives = {
-                "no", "no internet service", "no phone service",
-                "no online security", "no online backup", "no device protection",
-                "no tech support", "none", "", "nan"
-            }
-            # If the column is 0/1, treat 1 as has-service
-            if set(s.dropna().unique()).issubset({"0", "1"}):
-                return s == "1"
-            # Otherwise: anything not explicitly negative = has service
-            return ~s.isin(negatives)
-
-
         if present:
-            rows = []
-            for c in present:
-                mask_has = has_service_mask(df[c])
-                subset = df[mask_has].copy()
-                total = len(subset)
-                if total == 0:
-                    continue
-                y = (subset["Churn"] == "Yes").sum()
-                n = (subset["Churn"] == "No").sum()
-                rows.append({"Service": c, "Churn": "Yes", "Percent": round(y / total * 100, 1)})
-                rows.append({"Service": c, "Churn": "No", "Percent": round(n / total * 100, 1)})
+            churn_rates = []
+            
+            for service in present:
+                # Simple approach: treat anything that's not "No" as having the service
+                has_service = df[service] != "No"
+                service_users = df[has_service]
+                
+                if len(service_users) > 0:
+                    churn_rate = (service_users["Churn"] == "Yes").mean() * 100
+                    churn_rates.append({"Service": service, "Churn_Rate": round(churn_rate, 1)})
+            
+            # Create DataFrame and sort by churn rate
+            service_df = pd.DataFrame(churn_rates).sort_values("Churn_Rate", ascending=True)
+            
+            # Create horizontal bar chart
+            fig = px.bar(service_df, 
+                        x="Churn_Rate", 
+                        y="Service",
+                        orientation="h",
+                        title="Churn Rate by Service Type",
+                        labels={"Churn_Rate": "Churn Rate (%)", "Service": "Service"},
+                        color="Churn_Rate",
+                        color_continuous_scale=['#4ECDC4','#FF6B6B' ])
+            
 
-            chart_df = pd.DataFrame(rows)
-
-            # sort by higher churn (Yes) on top
-            order = (chart_df[chart_df["Churn"] == "Yes"]
-                     .sort_values("Percent", ascending=False)["Service"].tolist())
-
-            fig = px.bar(
-                chart_df, y="Service", x="Percent", color="Churn",
-                color_discrete_map={"No": "#4CAF50", "Yes": "#E53935"},
-                category_orders={"Service": order},
-                barmode="stack", text="Percent",
-                title="Churn Share by Service (100% of Service Users)"
-            )
-            fig.update_traces(texttemplate="%{text}%", textposition="inside", insidetextanchor="middle",
-                              marker_line_width=0.5, marker_line_color="#888")
-            fig.update_layout(
-                **DEFAULT_LAYOUT,
-                bargap=0.30,
-                yaxis_title="Service",
-                xaxis_title="Share (%)",
-                xaxis=dict(range=[0, 100])
-            )
+            fig.update_layout(showlegend=False,
+                            xaxis_title="Churn Rate (%)",
+                            yaxis_title="Service")
+            fig.update_coloraxes(showscale=False)
+            
             st.plotly_chart(fig, use_container_width=True)
         else:
             st.info("No service columns found to plot.")
