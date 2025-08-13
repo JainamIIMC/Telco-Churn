@@ -2,7 +2,6 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import seaborn as sns
@@ -19,6 +18,17 @@ from xgboost import XGBClassifier
 import warnings
 
 warnings.filterwarnings('ignore')
+
+# ---- Plotly defaults (apply once) ----
+import plotly.express as px  # ensure px is available here if moved
+px.defaults.template = "plotly_white"
+px.defaults.width = None
+px.defaults.height = 420
+DEFAULT_LAYOUT = dict(
+    title_x=0.5,  # center titles
+    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+    margin=dict(l=40, r=20, t=60, b=40),
+)
 
 # Page configuration
 st.set_page_config(
@@ -70,7 +80,7 @@ st.sidebar.title("🧭 Navigation")
 page = st.sidebar.radio(
     "Go to",
     ["🏠 Home", "📊 Data Overview", "🔍 Exploratory Analysis",
-     "🎯 Customer Insights", "🤖 ML Models", "📈 Model Comparison", "Demo",
+     "🎯 Customer Insights", "🤖 ML Models", "📈 Model Comparison", "🔮 Churn Prediction",
      "💡 Recommendations"]
 )
 
@@ -284,8 +294,86 @@ elif page == "🔍 Exploratory Analysis":
                      color_discrete_map={'Yes': '#FF6B6B', 'No': '#4ECDC4'})
         st.plotly_chart(fig, use_container_width=True)
 
-        # TODO: Add more service analyses
-        st.info("📌 TODO: Add analysis for PhoneService, OnlineSecurity, TechSupport, etc.")
+        st.subheader("📡 Service Usage & Plans")
+
+        # Contract distribution (share %) - horizontal, narrow bars
+        if "Contract" in df.columns:
+            vc_contract = df["Contract"].value_counts(dropna=False).rename_axis("Contract").reset_index(name="count")
+            vc_contract["share"] = (vc_contract["count"] / vc_contract["count"].sum() * 100).round(1)
+            fig = px.bar(vc_contract.sort_values("share"), y="Contract", x="share", text="share",
+                         orientation="h", labels={"share": "Share (%)"},
+                         title="Contract Types (Share %)")
+            fig.update_traces(texttemplate="%{text}%", textposition="outside", marker_line_width=0.5,
+                              marker_line_color="#888")
+            fig.update_layout(**DEFAULT_LAYOUT, bargap=0.35,
+                              xaxis=dict(range=[0, max(60, vc_contract['share'].max() + 10)]))
+            st.plotly_chart(fig, use_container_width=True)
+
+        cols_services = ["PhoneService", "MultipleLines", "InternetService", "OnlineSecurity", "OnlineBackup",
+                         "DeviceProtection", "TechSupport", "StreamingTV", "StreamingMovies"]
+        # Fix: Calculate churn split for customers having the service
+        # Clean churn share calculation for each service column
+        # ---- Churn share by service (100% of service users) ----
+        cols_services = [
+            "PhoneService", "MultipleLines", "InternetService", "OnlineSecurity", "OnlineBackup",
+            "DeviceProtection", "TechSupport", "StreamingTV", "StreamingMovies"
+        ]
+        present = [c for c in cols_services if c in df.columns]
+
+
+        def has_service_mask(col_ser: pd.Series) -> pd.Series:
+            s = col_ser.astype(str).str.strip().str.lower()
+            # values that clearly mean ABSENCE of the service
+            negatives = {
+                "no", "no internet service", "no phone service",
+                "no online security", "no online backup", "no device protection",
+                "no tech support", "none", "", "nan"
+            }
+            # If the column is 0/1, treat 1 as has-service
+            if set(s.dropna().unique()).issubset({"0", "1"}):
+                return s == "1"
+            # Otherwise: anything not explicitly negative = has service
+            return ~s.isin(negatives)
+
+
+        if present:
+            rows = []
+            for c in present:
+                mask_has = has_service_mask(df[c])
+                subset = df[mask_has].copy()
+                total = len(subset)
+                if total == 0:
+                    continue
+                y = (subset["Churn"] == "Yes").sum()
+                n = (subset["Churn"] == "No").sum()
+                rows.append({"Service": c, "Churn": "Yes", "Percent": round(y / total * 100, 1)})
+                rows.append({"Service": c, "Churn": "No", "Percent": round(n / total * 100, 1)})
+
+            chart_df = pd.DataFrame(rows)
+
+            # sort by higher churn (Yes) on top
+            order = (chart_df[chart_df["Churn"] == "Yes"]
+                     .sort_values("Percent", ascending=False)["Service"].tolist())
+
+            fig = px.bar(
+                chart_df, y="Service", x="Percent", color="Churn",
+                color_discrete_map={"No": "#4CAF50", "Yes": "#E53935"},
+                category_orders={"Service": order},
+                barmode="stack", text="Percent",
+                title="Churn Share by Service (100% of Service Users)"
+            )
+            fig.update_traces(texttemplate="%{text}%", textposition="inside", insidetextanchor="middle",
+                              marker_line_width=0.5, marker_line_color="#888")
+            fig.update_layout(
+                **DEFAULT_LAYOUT,
+                bargap=0.30,
+                yaxis_title="Service",
+                xaxis_title="Share (%)",
+                xaxis=dict(range=[0, 100])
+            )
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.info("No service columns found to plot.")
 
     with tab3:
         st.subheader("💰 Financial Analysis")
@@ -322,7 +410,7 @@ elif page == "🔍 Exploratory Analysis":
 
         fig = px.imshow(corr_matrix,
                         title="Feature Correlation Heatmap",
-                        color_continuous_scale='RdBu',
+                        color_continuous_scale='Reds',
                         aspect='auto')
         st.plotly_chart(fig, use_container_width=True)
 
@@ -600,8 +688,8 @@ elif page == "📈 Model Comparison":
 
         # TODO: Add cross-validation results
         st.info("📌 TODO: Add cross-validation scores and confidence intervals for more robust comparison")
-elif page == "Demo":
-    st.title("🔮 Customer Churn Prediction Demo")
+elif page == "🔮 Churn Prediction":
+    st.title("🔮 Customer Churn Prediction")
     st.markdown("### Enter customer details to predict churn probability")
 
     # Load and prepare data
