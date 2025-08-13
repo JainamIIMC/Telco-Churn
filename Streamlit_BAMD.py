@@ -1186,147 +1186,511 @@ elif page == "🔮 Churn Prediction":
                         st.metric("Model Confidence", f"{model_confidence:.1%}")
 elif page == "💡 Recommendations":
     st.title("💡 Strategic Recommendations")
-
+    
+    # Executive Summary Box
     st.markdown("""
-    ## 🎯 Data-Driven Retention Strategies
-
-    Based on our comprehensive analysis, here are the key recommendations to reduce customer churn:
-    """)
-
-    # Recommendations in columns
-    col1, col2 = st.columns(2)
-
-    with col1:
-        st.markdown("""
-        ### 🔴 Immediate Actions
-
-        **1. Contract Conversion Campaign**
-        - Target month-to-month customers with tenure > 6 months
-        - Offer incentives for 1-2 year contract upgrades
-        - Expected impact: 15-20% churn reduction
-
-        **2. Payment Method Optimization**
-        - Encourage electronic check users to switch to auto-pay
-        - Provide setup assistance and first-month discount
-        - Expected impact: 10% churn reduction
-
-        **3. New Customer Onboarding**
-        - Enhanced support for customers < 12 months
-        - Weekly check-ins during first 3 months
-        - Proactive issue resolution
-        """)
-
-    with col2:
-        st.markdown("""
-        ### 🟡 Medium-term Initiatives
-
-        **4. Service Bundle Optimization**
-        - Create attractive bundles with tech support
-        - Focus on fiber optic service improvements
-        - Personalized recommendations based on usage
-
-        **5. Proactive Customer Support**
-        - Implement predictive alerts for at-risk customers
-        - Dedicated retention team for high-value segments
-        - 24/7 tech support for premium customers
-
-        **6. Loyalty Program Launch**
-        - Tenure-based rewards and discounts
-        - Referral bonuses for long-term customers
-        - Exclusive perks for 2+ year contracts
-        """)
-
+    <div style='background-color: #f0f8ff; padding: 20px; border-radius: 10px; border-left: 5px solid #0F52BA;'>
+        <h3 style='color: #0F52BA; margin-top: 0;'>🎯 Executive Summary</h3>
+        <p style='font-size: 16px; margin-bottom: 0;'>
+        Our analysis identifies <b>26.6% churn rate</b> with clear intervention opportunities. 
+        Implementing these recommendations can reduce churn by <b>5-8%</b>, saving <b>$8.4M annually</b>.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
     st.markdown("---")
-
-    # ROI Estimation
-    st.subheader("💰 Expected ROI from Retention Initiatives")
-
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        st.metric("Churn Reduction Target", "5%", "from 26.6%")
-    with col2:
-        st.metric("Annual Revenue Saved", "$8.4M", "+12%")
-    with col3:
-        st.metric("Implementation Cost", "$1.2M", "one-time")
-    with col4:
-        st.metric("ROI", "600%", "first year")
-
-    # Implementation Roadmap
-    st.subheader("📅 Implementation Roadmap")
-
-    roadmap_data = {
-        'Phase': ['Phase 1: Quick Wins', 'Phase 2: System Integration',
-                  'Phase 3: Advanced Analytics', 'Phase 4: Optimization'],
-        'Timeline': ['Month 1-2', 'Month 3-4', 'Month 5-6', 'Month 7+'],
-        'Key Activities': [
-            'Contract conversion campaign, Payment method optimization',
-            'CRM integration, Automated alerts setup',
-            'ML model deployment, Real-time scoring',
-            'Continuous improvement, A/B testing'
-        ],
-        'Expected Impact': ['Quick 3-5% reduction', 'Additional 2-3% reduction',
-                            'Sustained 5%+ reduction', 'Ongoing optimization']
-    }
-    roadmap_df = pd.DataFrame(roadmap_data)
-
-    fig = go.Figure(data=[go.Table(
-        header=dict(values=list(roadmap_df.columns),
-                    fill_color='#0F52BA',
-                    font=dict(color='white', size=12),
-                    align='left'),
-        cells=dict(values=[roadmap_df[col] for col in roadmap_df.columns],
-                   fill_color='lavender',
-                   align='left'))
+    
+    # Main Tabs
+    main_tab1, main_tab2, main_tab3, main_tab4 = st.tabs([
+        "📊 Priority Matrix", 
+        "🚀 Action Plan", 
+        "💰 Financial Impact", 
+        "📈 Implementation Roadmap"
     ])
-    fig.update_layout(height=300)
-    st.plotly_chart(fig, use_container_width=True)
-    # Success Metrics
-    st.subheader("📊 Success Metrics & KPIs")
-
-    tab1, tab2, tab3 = st.tabs(["Leading Indicators", "Lagging Indicators", "Monitoring Dashboard"])
-
-    with tab1:
+    
+    with main_tab1:
+        st.subheader("Priority Action Matrix")
+        
+        # Create priority matrix data
+        priority_actions = pd.DataFrame({
+            'Action': ['Contract Conversion', 'Payment Optimization', 'Enhanced Onboarding', 
+                       'Service Bundles', 'Proactive Support', 'Loyalty Program'],
+            'Impact': [85, 70, 75, 60, 80, 65],
+            'Effort': [30, 20, 40, 70, 60, 80],
+            'Timeline': ['Immediate', 'Immediate', 'Immediate', 'Medium-term', 'Medium-term', 'Long-term'],
+            'ROI': [450, 380, 320, 250, 300, 200]
+        })
+        
+        fig_matrix = go.Figure()
+        
+        colors = {'Immediate': '#ff4444', 'Medium-term': '#ffaa44', 'Long-term': '#44aa44'}
+        
+        for timeline in ['Immediate', 'Medium-term', 'Long-term']:
+            df_filtered = priority_actions[priority_actions['Timeline'] == timeline]
+            if not df_filtered.empty:
+                fig_matrix.add_trace(go.Scatter(
+                    x=df_filtered['Effort'],
+                    y=df_filtered['Impact'],
+                    mode='markers+text',
+                    name=timeline,
+                    text=df_filtered['Action'],
+                    textposition="top center",
+                    marker=dict(
+                        size=df_filtered['ROI']/10,
+                        color=colors[timeline],
+                        opacity=0.6,
+                        line=dict(width=2, color='white')
+                    )
+                ))
+        
+        fig_matrix.update_layout(
+            title="Impact vs Effort Analysis (Bubble size = ROI)",
+            xaxis_title="Implementation Effort →",
+            yaxis_title="Business Impact →",
+            height=500,
+            showlegend=True,
+            xaxis=dict(range=[0, 100]),
+            yaxis=dict(range=[0, 100])
+        )
+        
+        # Add quadrant lines
+        fig_matrix.add_hline(y=50, line_dash="dash", line_color="gray", opacity=0.5)
+        fig_matrix.add_vline(x=50, line_dash="dash", line_color="gray", opacity=0.5)
+        
+        # Add quadrant labels
+        fig_matrix.add_annotation(x=25, y=75, text="Quick Wins", showarrow=False, font=dict(size=12, color="green"))
+        fig_matrix.add_annotation(x=75, y=75, text="Major Projects", showarrow=False, font=dict(size=12, color="orange"))
+        fig_matrix.add_annotation(x=25, y=25, text="Low Priority", showarrow=False, font=dict(size=12, color="gray"))
+        fig_matrix.add_annotation(x=75, y=25, text="Questionable", showarrow=False, font=dict(size=12, color="red"))
+        
+        st.plotly_chart(fig_matrix, use_container_width=True)
+        
+        # Priority Actions Summary
+        col1, col2 = st.columns(2)
+        with col1:
+            st.info("**🎯 Quick Wins:** Focus on Contract Conversion and Payment Optimization for immediate impact with minimal effort.")
+        with col2:
+            st.warning("**⚡ Major Projects:** Proactive Support systems require more resources but deliver substantial long-term value.")
+    
+    with main_tab2:
+        st.subheader("Implementation Action Plan")
+        
+        # Sub-tabs for different time horizons
+        action_tab1, action_tab2, action_tab3 = st.tabs([
+            "🔴 Immediate Actions (0-2 months)", 
+            "🟡 Medium-term (3-6 months)", 
+            "🟢 Long-term (6+ months)"
+        ])
+        
+        with action_tab1:
+            col1, col2 = st.columns([2, 1])
+            
+            with col1:
+                st.markdown("### 1. Contract Conversion Campaign")
+                st.markdown("""
+                <div style='background-color: #fff5f5; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>
+                    <b>Target Segment:</b> Month-to-month customers with 6+ months tenure<br>
+                    <b>Strategy:</b> Offer 20% discount for 1-year contract, 30% for 2-year<br>
+                    <b>Implementation:</b> Email campaign + In-app notifications + Call center outreach<br>
+                    <b>Success Metrics:</b> 30% conversion rate, 15-20% churn reduction
+                </div>
+                """, unsafe_allow_html=True)
+                
+                st.markdown("### 2. Payment Method Optimization")
+                st.markdown("""
+                <div style='background-color: #fff5f5; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>
+                    <b>Target Segment:</b> Electronic check users (highest churn group)<br>
+                    <b>Strategy:</b> $5/month discount for credit card auto-pay setup<br>
+                    <b>Implementation:</b> Automated workflow with payment reminders<br>
+                    <b>Success Metrics:</b> 40% adoption rate, 10% churn reduction
+                </div>
+                """, unsafe_allow_html=True)
+                
+                st.markdown("### 3. Enhanced Onboarding Program")
+                st.markdown("""
+                <div style='background-color: #fff5f5; padding: 15px; border-radius: 8px;'>
+                    <b>Target Segment:</b> New customers (0-12 months)<br>
+                    <b>Strategy:</b> Dedicated success manager for first 90 days<br>
+                    <b>Implementation:</b> Automated check-ins + Personal touchpoints<br>
+                    <b>Success Metrics:</b> 25% reduction in early churn
+                </div>
+                """, unsafe_allow_html=True)
+            
+            with col2:
+                st.metric("Expected Churn Reduction", "3-5%", "in 2 months")
+                st.metric("Investment Required", "$300K", "quick implementation")
+                st.metric("Affected Customers", "12,000", "high-risk segment")
+                
+                # Timeline visualization
+                st.markdown("### Implementation Timeline")
+                timeline_data = pd.DataFrame({
+                    'Week': ['Week 1-2', 'Week 3-4', 'Week 5-6', 'Week 7-8'],
+                    'Progress': [25, 50, 75, 100]
+                })
+                fig_timeline = go.Figure(go.Bar(
+                    x=timeline_data['Progress'],
+                    y=timeline_data['Week'],
+                    orientation='h',
+                    marker_color=['#ff6b6b', '#ffd93d', '#6bcf7f', '#4ecdc4']
+                ))
+                fig_timeline.update_layout(
+                    height=200, 
+                    showlegend=False, 
+                    xaxis_title="Completion %",
+                    margin=dict(l=0, r=0, t=0, b=0)
+                )
+                st.plotly_chart(fig_timeline, use_container_width=True)
+        
+        # Milestones
+        st.markdown("### 🎯 Key Milestones")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown("""
+            **Q1 2024:**
+            - ✅ Complete churn analysis
+            - ✅ Identify quick wins
+            - ✅ Launch contract conversion campaign
+            
+            **Q2 2024:**
+            - 🔄 Implement payment optimization
+            - 🔄 Deploy enhanced onboarding
+            - 🔄 Begin system integration
+            """)
+        
+        with col2:
+            st.markdown("""
+            **Q3 2024:**
+            - 📅 Launch service bundles
+            - 📅 Deploy ML churn prediction
+            - 📅 Begin loyalty program pilot
+            
+            **Q4 2024:**
+            - 📅 Full AI/ML deployment
+            - 📅 Loyalty program rollout
+            - 📅 Year 1 performance review
+            """)
+        
+        # Phase Details
+        st.markdown("### 📋 Phase Details")
+        
+        phase_details = {
+            "🔴 Foundation Building (Jan-Feb)": {
+                "Focus": "Establish baseline metrics and prepare infrastructure",
+                "Deliverables": ["Churn analysis dashboard", "Customer segmentation", "Team training"],
+                "Budget": "$200K"
+            },
+            "🟡 Quick Wins (Jan-Mar)": {
+                "Focus": "Implement high-impact, low-effort initiatives",
+                "Deliverables": ["Contract conversion campaign", "Payment optimization", "Basic retention workflows"],
+                "Budget": "$300K"
+            },
+            "🔵 System Integration (Mar-May)": {
+                "Focus": "Connect data systems and automate processes",
+                "Deliverables": ["CRM integration", "Automated alerts", "Real-time reporting"],
+                "Budget": "$250K"
+            },
+            "🟢 Advanced Analytics (May-Jul)": {
+                "Focus": "Deploy predictive models and insights",
+                "Deliverables": ["Churn prediction model", "Customer lifetime value calculator", "Risk scoring"],
+                "Budget": "$200K"
+            },
+            "🟣 AI/ML Deployment (Jul-Sep)": {
+                "Focus": "Launch intelligent automation and personalization",
+                "Deliverables": ["Personalized recommendations", "Automated interventions", "Sentiment analysis"],
+                "Budget": "$150K"
+            },
+            "⚡ Continuous Optimization (Sep-Dec)": {
+                "Focus": "Refine and scale successful initiatives",
+                "Deliverables": ["A/B testing framework", "Performance optimization", "2025 strategy"],
+                "Budget": "$100K"
+            }
+        }
+        
+        for phase, details in phase_details.items():
+            with st.expander(phase, expanded=False):
+                col1, col2 = st.columns([3, 1])
+                with col1:
+                    st.markdown(f"**Focus:** {details['Focus']}")
+                    st.markdown("**Key Deliverables:**")
+                    for item in details['Deliverables']:
+                        st.markdown(f"• {item}")
+                with col2:
+                    st.metric("Budget", details['Budget'])
+        
+        with action_tab2:
+            with st.expander("📦 Service Bundle Optimization", expanded=True):
+                col1, col2 = st.columns([3, 1])
+                with col1:
+                    st.markdown("""
+                    **Implementation Plan:**
+                    - Create 3 tiers of service bundles: Essential, Professional, Premium
+                    - Include tech support in Professional and Premium tiers
+                    - Fiber optic priority upgrades for Premium customers
+                    - Personalized bundle recommendations based on usage patterns
+                    
+                    **Timeline:** Months 3-4 for design, Month 5 for launch
+                    """)
+                with col2:
+                    st.metric("Revenue Uplift", "+8%", "per customer")
+                    st.metric("Churn Impact", "-2.5%", "bundle users")
+            
+            with st.expander("🛡️ Proactive Customer Support", expanded=True):
+                col1, col2 = st.columns([3, 1])
+                with col1:
+                    st.markdown("""
+                    **Implementation Plan:**
+                    - ML-powered early warning system for at-risk customers
+                    - Automated alerts 30 days before predicted churn
+                    - Dedicated retention specialists for high-value accounts
+                    - 24/7 premium support tier with <5 min response time
+                    
+                    **Timeline:** Month 3 for system setup, Month 4-5 for training, Month 6 go-live
+                    """)
+                with col2:
+                    st.metric("Detection Rate", "78%", "accuracy")
+                    st.metric("Save Rate", "45%", "contacted")
+        
+        with action_tab3:
+            with st.expander("🏆 Loyalty Program Launch", expanded=True):
+                col1, col2 = st.columns([3, 1])
+                with col1:
+                    st.markdown("""
+                    **Program Structure:**
+                    - Points-based system: 1 point per $1 spent
+                    - Milestone rewards at 6, 12, 24, 36 months
+                    - Referral bonuses: 500 points per successful referral
+                    - Exclusive perks: Priority support, free upgrades, event invites
+                    
+                    **Long-term Benefits:**
+                    - Increased customer lifetime value
+                    - Organic growth through referrals
+                    - Enhanced brand loyalty
+                    """)
+                with col2:
+                    st.metric("Engagement", "65%", "participation")
+                    st.metric("LTV Increase", "+22%", "loyal customers")
+            
+            with st.expander("🔄 Continuous Improvement Framework", expanded=True):
+                st.markdown("""
+                **Establish ongoing optimization:**
+                - Monthly churn analysis reviews
+                - Quarterly strategy adjustments
+                - Annual program overhauls
+                - Real-time dashboard monitoring
+                - A/B testing for all initiatives
+                """)
+    
+    with main_tab3:
+        st.subheader("Financial Impact Analysis")
+        
+        col1, col2, col3 = st.columns([1, 2, 1])
+        
+        with col1:
+            st.markdown("### 💸 Investment Breakdown")
+            cost_data = pd.DataFrame({
+                'Category': ['Technology', 'Personnel', 'Marketing', 'Training', 'Other'],
+                'Amount': [400000, 350000, 200000, 150000, 100000]
+            })
+            
+            fig_cost = go.Figure(go.Pie(
+                labels=cost_data['Category'],
+                values=cost_data['Amount'],
+                hole=0.4,
+                marker_colors=['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FECA57']
+            ))
+            fig_cost.update_layout(
+                height=300, 
+                showlegend=True,
+                margin=dict(l=0, r=0, t=20, b=0)
+            )
+            st.plotly_chart(fig_cost, use_container_width=True)
+            
+            st.info(f"**Total Investment:** ${sum(cost_data['Amount']):,.0f}")
+        
+        with col2:
+            st.markdown("### 📈 ROI Projection (5 Years)")
+            
+            years = list(range(1, 6))
+            investment = [1.2, 0.3, 0.2, 0.2, 0.2]
+            returns = [2.4, 4.8, 6.2, 7.5, 8.4]
+            net_benefit = [r - i for r, i in zip(returns, investment)]
+            
+            fig_roi = go.Figure()
+            fig_roi.add_trace(go.Bar(name='Investment', x=years, y=investment, marker_color='#ff6b6b'))
+            fig_roi.add_trace(go.Bar(name='Returns', x=years, y=returns, marker_color='#4ecdc4'))
+            fig_roi.add_trace(go.Scatter(
+                name='Net Benefit', 
+                x=years, 
+                y=net_benefit,
+                mode='lines+markers', 
+                marker_color='#2ecc71', 
+                yaxis='y2'
+            ))
+            
+            fig_roi.update_layout(
+                xaxis_title="Year",
+                yaxis_title="Amount ($M)",
+                yaxis2=dict(title="Net Benefit ($M)", overlaying='y', side='right'),
+                height=350,
+                hovermode='x unified',
+                margin=dict(l=0, r=0, t=20, b=0)
+            )
+            st.plotly_chart(fig_roi, use_container_width=True)
+        
+        with col3:
+            st.markdown("### 🎯 Key Metrics")
+            st.metric("5-Year NPV", "$24.8M", "+1,967%")
+            st.metric("Payback Period", "8 months", "")
+            st.metric("Customer LTV", "+$450", "+32%")
+            st.metric("NPS Score", "+15 pts", "projected")
+        
+        # Detailed Financial Breakdown
+        st.markdown("---")
+        st.markdown("### 📊 Detailed Financial Projections")
+        
+        financial_data = pd.DataFrame({
+            'Metric': ['Revenue Retention', 'Cost Savings', 'New Revenue', 'Total Benefit'],
+            'Year 1': [1.8, 0.4, 0.2, 2.4],
+            'Year 2': [3.2, 0.8, 0.8, 4.8],
+            'Year 3': [4.0, 1.2, 1.0, 6.2],
+            'Year 4': [4.5, 1.5, 1.5, 7.5],
+            'Year 5': [5.0, 1.6, 1.8, 8.4]
+        })
+        
+        st.dataframe(
+            financial_data.style.format({'Year 1': '${:.1f}M', 'Year 2': '${:.1f}M', 
+                                        'Year 3': '${:.1f}M', 'Year 4': '${:.1f}M', 
+                                        'Year 5': '${:.1f}M'}),
+            use_container_width=True
+        )
+    
+    with main_tab4:
+        st.subheader("Strategic Implementation Roadmap")
+        
+        # Create a simpler timeline visualization that will definitely work
+        st.markdown("### 📅 2024 Implementation Timeline")
+        
+        # Timeline data with months
+        timeline_df = pd.DataFrame({
+            'Phase': ['Foundation', 'Quick Wins', 'Integration', 'Analytics', 'AI/ML', 'Optimization'],
+            'Q1': ['████████', '██████', '', '', '', ''],
+            'Q2': ['', '', '████████', '████', '', ''],
+            'Q3': ['', '', '', '████████', '████████', ''],
+            'Q4': ['', '', '', '', '████', '████████']
+        })
+        
+        # Display as a styled table
         st.markdown("""
-        **Monitor Weekly:**
-        - Number of contract conversions
-        - Customer support ticket resolution time
-        - Payment method changes
-        - Service bundle adoption rates
-
-        **Monitor Daily:**
-        - High-risk customer interactions
-        - Proactive outreach completion rate
-        - Customer satisfaction scores
-        """)
-
-    with tab2:
-        st.markdown("""
-        **Monitor Monthly:**
-        - Overall churn rate
-        - Churn rate by segment
-        - Customer lifetime value
-        - Revenue retention rate
-
-        **Monitor Quarterly:**
-        - Net Promoter Score (NPS)
-        - Customer acquisition cost vs retention cost
-        - Market share changes
-        """)
-
-    with tab3:
-        st.markdown("""
-        **Real-time Dashboard Components:**
-        - Live churn risk scores
-        - Alert system for high-risk behaviors
-        - Intervention success tracking
-        - ROI calculator
-
-        **Automated Reports:**
-        - Daily executive summary
-        - Weekly team performance metrics
-        - Monthly trend analysis
-        """)
-
+        <style>
+        .timeline-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .timeline-table th {
+            background-color: #0F52BA;
+            color: white;
+            padding: 10px;
+            text-align: left;
+        }
+        .timeline-table td {
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+        
+        # Alternative Gantt visualization using bar chart
+        gantt_data = pd.DataFrame({
+            'Task': ['Foundation Building', 'Quick Wins', 'System Integration', 
+                     'Advanced Analytics', 'AI/ML Deployment', 'Continuous Optimization'],
+            'Start_Month': [1, 1, 3, 5, 7, 9],
+            'Duration': [2, 2, 2, 2, 2, 4],
+            'Team': ['Planning', 'Execution', 'Technology', 'Analytics', 'Innovation', 'Operations']
+        })
+        
+        fig_timeline = go.Figure()
+        
+        colors = {'Planning': '#FF6B6B', 'Execution': '#4ECDC4', 'Technology': '#45B7D1', 
+                  'Analytics': '#96CEB4', 'Innovation': '#FECA57', 'Operations': '#5F27CD'}
+        
+        for idx, row in gantt_data.iterrows():
+            fig_timeline.add_trace(go.Bar(
+                name=row['Task'],
+                x=[row['Duration']],
+                y=[row['Task']],
+                base=[row['Start_Month']],
+                orientation='h',
+                marker=dict(color=colors[row['Team']]),
+                text=row['Team'],
+                textposition='inside',
+                showlegend=False,
+                hovertemplate='<b>%{y}</b><br>Start: Month %{base}<br>Duration: %{x} months<br>Team: %{text}<extra></extra>'
+            ))
+        
+        fig_timeline.update_layout(
+            title="2024 Project Timeline",
+            xaxis=dict(
+                title="Month",
+                tickmode='array',
+                tickvals=list(range(1, 13)),
+                ticktext=['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                range=[0.5, 12.5]
+            ),
+            yaxis=dict(title=""),
+            height=400,
+            barmode='stack',
+            showlegend=False
+        )
+        
+        st.plotly_chart(fig_timeline, use_container_width=True)
+        
+        # Milestones
+        st.markdown("### 🎯 Key Milestones")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown("""
+            **Q1 2024:**
+            - ✅ Complete churn analysis
+            - ✅ Identify quick wins
+            - ✅ Launch contract conversion campaign
+            
+            **Q2 2024:**
+            - 🔄 Implement payment optimization
+            - 🔄 Deploy enhanced onboarding
+            - 🔄 Begin system integration
+            """)
+        
+        with col2:
+            st.markdown("""
+            **Q3 2024:**
+            - 📅 Launch service bundles
+            - 📅 Deploy ML churn prediction
+            - 📅 Begin loyalty program pilot
+            
+            **Q4 2024:**
+            - 📅 Full AI/ML deployment
+            - 📅 Loyalty program rollout
+            - 📅 Year 1 performance review
+            """)
+    
+    # Final Summary Section
+    st.markdown("---")
+    st.markdown("""
+    <div style='background-color: #e8f4f8; padding: 20px; border-radius: 10px; margin-top: 30px;'>
+        <h3 style='color: #0F52BA; text-align: center;'>🚀 Ready to Transform Your Customer Retention?</h3>
+        <p style='font-size: 16px; text-align: center;'>
+        Start with our quick wins to see immediate impact while building towards long-term success.
+        </p>
+        <div style='margin-top: 20px; text-align: center;'>
+            <p style='color: #666; font-size: 14px;'>
+            <b>Next Steps:</b> Review the priority matrix, select your immediate actions, and begin implementation within 2 weeks.
+            </p>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
     # Call to Action
     st.markdown("---")
     st.success("""
