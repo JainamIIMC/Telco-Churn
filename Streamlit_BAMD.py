@@ -88,7 +88,7 @@ st.sidebar.markdown("""
 page = st.sidebar.selectbox(
     "Go to",
     ["🏠 Home", "📊 Data Overview", "🔍 Exploratory Analysis",
-     "🎯 Customer Insights", "🤖 ML Models", "📈 Model Comparison", "🔮 Churn Prediction",
+     "🎯 Customer Insights", "💻 ML Models", "📈 Model Comparison", "🔮 Churn Prediction",
      "💡 Recommendations"]
 )
 
@@ -453,8 +453,8 @@ elif page == "🎯 Customer Insights":
     # TODO: Add customer lifetime value analysis
     st.info("📌 TODO: Add Customer Lifetime Value (CLV) analysis and profitability segments")
 
-elif page == "🤖 ML Models":
-    st.title("🤖 Machine Learning Models")
+elif page == "💻 ML Models":
+    st.title("💻 Machine Learning Models")
 
     df = load_data()
     df_processed = preprocess_data(df)
@@ -680,38 +680,35 @@ elif page == "🔮 Churn Prediction":
 
     with tab1:
         st.subheader("Demographics")
-        col1, col2, col3 = st.columns(3)
-
+        
+        # Row 1: Basic Demographics
+        col1, col2, col3 = st.columns([1, 1, 1])
+        
         with col1:
-            gender = st.radio("Gender", ["Male", "Female"], horizontal=True)
-
-            # Senior Citizen with toggle
-            senior_col1, senior_col2 = st.columns([2, 1])
-            with senior_col1:
-                st.write("Senior Citizen (65+ years)")
-            with senior_col2:
-                SeniorCitizen = st.toggle("", value=False)
-
+            gender = st.selectbox("Gender", ["Male", "Female"])
+            SeniorCitizen = st.checkbox("Senior Citizen (65+ years)", value=False)
+        
         with col2:
-            # Partner with visual indicator
-            partner_col1, partner_col2 = st.columns([1, 1])
-            with partner_col1:
-                st.write("Has Partner")
-            with partner_col2:
-                Partner = st.toggle("", value=False, key="partner")
-
-            dep_col1, dep_col2 = st.columns([1, 1])
-            with dep_col1:
-                st.write("Has Dependents")
-            with dep_col2:
-                Dependents = st.toggle("", value=False, key="dependents")
-
+            Partner = st.checkbox("Has Partner", value=False)
+            Dependents = st.checkbox("Has Dependents", value=False)
+        
         with col3:
-            # Tenure with both slider and input
-            st.write("Tenure (months)")
-            tenure_slider = st.slider("", 0, 72, 12, label_visibility="collapsed")
-            tenure = st.number_input("Or enter manually:", min_value=0, max_value=72, value=tenure_slider)
-
+            tenure = st.number_input(
+                "Tenure (months)", 
+                min_value=0, 
+                max_value=72, 
+                value=12,
+                help="How long the customer has been with the company"
+            )
+            tenure_slider = st.slider(
+                "Adjust with slider",
+                min_value=0,
+                max_value=72,
+                value=tenure,
+                label_visibility="collapsed"
+            )
+            tenure = tenure_slider
+            
             # Visual tenure indicator
             if tenure < 12:
                 st.caption("🆕 New Customer")
@@ -722,55 +719,54 @@ elif page == "🔮 Churn Prediction":
 
     with tab2:
         st.subheader("Services Subscribed")
-
-        # Phone Services
+        
+        # Phone Services Section
         st.markdown("#### 📞 Phone Services")
         col1, col2 = st.columns(2)
-
+        
         with col1:
-            phone_col1, phone_col2 = st.columns([1, 1])
-            with phone_col1:
-                st.write("Phone Service")
-            with phone_col2:
-                PhoneService = st.toggle("", value=True, key="phone")
-
+            PhoneService = st.checkbox("Phone Service", value=True)
+        
         with col2:
             if PhoneService:
-                MultipleLines = st.selectbox("Multiple Lines", ["No", "Yes"])
+                MultipleLines = st.selectbox(
+                    "Multiple Lines", 
+                    ["No", "Yes"],
+                    disabled=not PhoneService
+                )
             else:
                 MultipleLines = "No phone service"
-                st.info("No phone service selected")
-
-        # Internet Services
+                st.info("Enable phone service to select multiple lines")
+        
+        st.markdown("---")
+        
+        # Internet Services Section
         st.markdown("#### 🌐 Internet Services")
-        InternetService = st.radio(
+        InternetService = st.selectbox(
             "Internet Service Type",
             ["No", "DSL", "Fiber optic"],
-            horizontal=True,
             help="Fiber optic provides the fastest speeds"
         )
-
+        
         # Show internet-dependent services only if internet is selected
         if InternetService != "No":
             st.markdown("##### Additional Internet Services")
-
-            # Create a 2x3 grid for services
+            
+            # Create a clean 3x2 grid for services
             col1, col2, col3 = st.columns(3)
-            col4, col5, col6 = st.columns(3)
-
+            
             with col1:
-                OnlineSecurity = st.checkbox("🔒 Online Security", value=False)
+                OnlineSecurity = st.checkbox("🔒 Online Security")
+                TechSupport = st.checkbox("🛠️ Tech Support")
+            
             with col2:
-                OnlineBackup = st.checkbox("☁️ Online Backup", value=False)
+                OnlineBackup = st.checkbox("☁️ Online Backup")
+                StreamingTV = st.checkbox("📺 Streaming TV")
+            
             with col3:
-                DeviceProtection = st.checkbox("📱 Device Protection", value=False)
-            with col4:
-                TechSupport = st.checkbox("🛠️ Tech Support", value=False)
-            with col5:
-                StreamingTV = st.checkbox("📺 Streaming TV", value=False)
-            with col6:
-                StreamingMovies = st.checkbox("🎬 Streaming Movies", value=False)
-
+                DeviceProtection = st.checkbox("📱 Device Protection")
+                StreamingMovies = st.checkbox("🎬 Streaming Movies")
+            
             # Convert checkboxes to Yes/No
             OnlineSecurity = "Yes" if OnlineSecurity else "No"
             OnlineBackup = "Yes" if OnlineBackup else "No"
@@ -778,14 +774,19 @@ elif page == "🔮 Churn Prediction":
             TechSupport = "Yes" if TechSupport else "No"
             StreamingTV = "Yes" if StreamingTV else "No"
             StreamingMovies = "Yes" if StreamingMovies else "No"
-
+            
             # Show service bundle recommendation
-            services_count = sum([x == "Yes" for x in [OnlineSecurity, OnlineBackup,
-                                                       DeviceProtection, TechSupport,
-                                                       StreamingTV, StreamingMovies]])
+            services_count = sum([x == "Yes" for x in [
+                OnlineSecurity, OnlineBackup, DeviceProtection, 
+                TechSupport, StreamingTV, StreamingMovies
+            ]])
+            
             if services_count >= 4:
                 st.success(f"💰 Bundle Deal Available! You have {services_count} services - eligible for 15% discount")
+            elif services_count >= 2:
+                st.info(f"💡 You have {services_count} services. Add {4-services_count} more for bundle discount!")
         else:
+            st.info("No internet service selected")
             OnlineSecurity = "No internet service"
             OnlineBackup = "No internet service"
             DeviceProtection = "No internet service"
@@ -795,17 +796,17 @@ elif page == "🔮 Churn Prediction":
 
     with tab3:
         st.subheader("Contract & Payment")
-
+        
         col1, col2 = st.columns(2)
-
+        
         with col1:
-            # Contract with visual emphasis
-            Contract = st.radio(
+            st.markdown("##### Contract Details")
+            Contract = st.selectbox(
                 "Contract Type",
                 ["Month-to-month", "One year", "Two year"],
                 help="Longer contracts typically have lower churn rates"
             )
-
+            
             # Show contract benefits
             if Contract == "Month-to-month":
                 st.warning("⚠️ Higher flexibility but higher churn risk")
@@ -813,64 +814,90 @@ elif page == "🔮 Churn Prediction":
                 st.info("ℹ️ Balanced commitment and flexibility")
             else:
                 st.success("✅ Best value and lowest churn risk")
-
-            # Paperless billing with icon
-            paperless_col1, paperless_col2 = st.columns([3, 1])
-            with paperless_col1:
-                st.write("📧 Paperless Billing")
-            with paperless_col2:
-                PaperlessBilling = st.toggle("", value=True, key="paperless")
-
+        
         with col2:
+            st.markdown("##### Payment Details")
             PaymentMethod = st.selectbox(
                 "Payment Method",
                 ["Electronic check", "Mailed check",
                  "Bank transfer (automatic)", "Credit card (automatic)"],
                 help="Automatic payment methods have lower churn rates"
             )
-
+            
             # Payment method recommendation
             if "automatic" in PaymentMethod:
                 st.success("✅ Auto-pay reduces churn risk")
             else:
                 st.info("💡 Consider auto-pay for convenience")
-
+        
+        st.markdown("---")
+        
+        # Billing Preferences
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown("##### Billing Preferences")
+            PaperlessBilling = st.checkbox("📧 Paperless Billing", value=True)
+        
+        st.markdown("---")
+        
+        # Charges Section
         st.markdown("#### 💵 Charges")
         col1, col2, col3 = st.columns(3)
-
+        
         with col1:
-            # Monthly charges with slider and input
-            st.write("Monthly Charges ($)")
-            monthly_slider = st.slider("", 18.0, 120.0, 70.0, 0.5, label_visibility="collapsed")
             MonthlyCharges = st.number_input(
-                "Or enter manually:",
+                "Monthly Charges ($)",
                 min_value=18.0,
                 max_value=200.0,
-                value=monthly_slider,
-                step=0.5
+                value=70.0,
+                step=0.50,
+                help="Monthly subscription cost"
             )
-
+            MonthlyCharges_slider = st.slider(
+                "Adjust with slider",
+                min_value=18.0,
+                max_value=200.0,
+                value=MonthlyCharges,
+                step=0.50,
+                label_visibility="collapsed"
+            )
+            MonthlyCharges = MonthlyCharges_slider
+        
         with col2:
-            # Auto-calculate total charges based on tenure and monthly
-            st.write("Total Charges ($)")
-            calculated_total = MonthlyCharges * tenure
             TotalCharges = st.number_input(
-                "Auto-calculated (editable):",
+                "Total Charges ($)",
                 min_value=0.0,
                 max_value=10000.0,
-                value=calculated_total,
-                step=10.0
+                value=1000.0,
+                step=10.0,
+                help="Total amount paid to date"
             )
-
+            TotalCharges_slider = st.slider(
+                "Adjust with slider",
+                min_value=0.0,
+                max_value=10000.0,
+                value=TotalCharges,
+                step=10.0,
+                label_visibility="collapsed"
+            )
+            TotalCharges = TotalCharges_slider
+        
         with col3:
-            # Show average charges indicator
-            st.write("Cost Analysis")
+            st.markdown("##### Cost Analysis")
             if MonthlyCharges < 35:
                 st.success("💚 Low cost tier")
             elif MonthlyCharges < 65:
                 st.info("💙 Medium cost tier")
             else:
                 st.warning("💛 Premium tier")
+            
+            # Show monthly vs average
+            avg_monthly = 70.0  # You can calculate this from your data
+            diff = MonthlyCharges - avg_monthly
+            if diff > 0:
+                st.caption(f"${diff:.2f} above average")
+            else:
+                st.caption(f"${abs(diff):.2f} below average")
 
     # Convert inputs for model
     Partner = "Yes" if Partner else "No"
@@ -878,30 +905,63 @@ elif page == "🔮 Churn Prediction":
     PhoneService = "Yes" if PhoneService else "No"
     PaperlessBilling = "Yes" if PaperlessBilling else "No"
     SeniorCitizen = 1 if SeniorCitizen else 0
+    
+    # Calculate services_count for later use
+    services_count = 0
+    if InternetService != "No":
+        services_count = sum([x == "Yes" for x in [
+            OnlineSecurity, OnlineBackup, DeviceProtection, 
+            TechSupport, StreamingTV, StreamingMovies
+        ]])
 
     # Customer Summary Card
     st.markdown("---")
-    st.subheader("📋 Customer Profile Summary")
-
+    st.markdown("### 📋 Customer Profile Summary")
+    
+    # Create a clean 4-column layout for metrics with smaller text
     col1, col2, col3, col4 = st.columns(4)
+    
     with col1:
-        st.metric("Customer Type", "Senior" if SeniorCitizen else "Regular")
-        st.metric("Tenure", f"{tenure} months")
+        st.markdown(f"<p style='font-size: 14px; margin: 0;'><b>Customer Type</b></p>", unsafe_allow_html=True)
+        st.markdown(f"<p style='font-size: 20px; margin: 0;'>{'Senior' if SeniorCitizen else 'Regular'}</p>", unsafe_allow_html=True)
+        st.markdown(f"<p style='font-size: 14px; margin: 15px 0 0 0;'><b>Tenure</b></p>", unsafe_allow_html=True)
+        st.markdown(f"<p style='font-size: 20px; margin: 0;'>{tenure} months</p>", unsafe_allow_html=True)
+    
     with col2:
-        st.metric("Contract", Contract.replace("-", " "))
-        st.metric("Monthly Charges", f"${MonthlyCharges:.2f}")
+        st.markdown(f"<p style='font-size: 14px; margin: 0;'><b>Contract</b></p>", unsafe_allow_html=True)
+        st.markdown(f"<p style='font-size: 20px; margin: 0;'>{Contract.split('-')[0] if '-' in Contract else Contract}</p>", unsafe_allow_html=True)
+        st.markdown(f"<p style='font-size: 14px; margin: 15px 0 0 0;'><b>Monthly Charges</b></p>", unsafe_allow_html=True)
+        st.markdown(f"<p style='font-size: 20px; margin: 0;'>${MonthlyCharges:.2f}</p>", unsafe_allow_html=True)
+    
     with col3:
+        # Count active services
         services_list = []
-        if PhoneService == "Yes": services_list.append("Phone")
-        if InternetService != "No": services_list.append("Internet")
-        if OnlineSecurity == "Yes": services_list.append("Security")
-        st.metric("Services", len(services_list))
-        st.metric("Total Charges", f"${TotalCharges:.2f}")
+        if PhoneService == "Yes": 
+            services_list.append("Phone")
+        if InternetService != "No": 
+            services_list.append("Internet")
+        if InternetService != "No":
+            if OnlineSecurity == "Yes": services_list.append("Security")
+            if OnlineBackup == "Yes": services_list.append("Backup")
+            if DeviceProtection == "Yes": services_list.append("Protection")
+            if TechSupport == "Yes": services_list.append("Support")
+            if StreamingTV == "Yes": services_list.append("TV")
+            if StreamingMovies == "Yes": services_list.append("Movies")
+        
+        st.markdown(f"<p style='font-size: 14px; margin: 0;'><b>Active Services</b></p>", unsafe_allow_html=True)
+        st.markdown(f"<p style='font-size: 20px; margin: 0;'>{len(services_list)}</p>", unsafe_allow_html=True)
+        st.markdown(f"<p style='font-size: 14px; margin: 15px 0 0 0;'><b>Total Charges</b></p>", unsafe_allow_html=True)
+        st.markdown(f"<p style='font-size: 20px; margin: 0;'>${TotalCharges:.2f}</p>", unsafe_allow_html=True)
+    
     with col4:
-        st.metric("Payment", "Auto" if "automatic" in PaymentMethod else "Manual")
-        st.metric("Billing", "Paperless" if PaperlessBilling == "Yes" else "Paper")
+        payment_type = "Auto-pay" if "automatic" in PaymentMethod else "Manual"
+        st.markdown(f"<p style='font-size: 14px; margin: 0;'><b>Payment Type</b></p>", unsafe_allow_html=True)
+        st.markdown(f"<p style='font-size: 20px; margin: 0;'>{payment_type}</p>", unsafe_allow_html=True)
+        billing_type = "Paperless" if PaperlessBilling else "Paper"
+        st.markdown(f"<p style='font-size: 14px; margin: 15px 0 0 0;'><b>Billing Type</b></p>", unsafe_allow_html=True)
+        st.markdown(f"<p style='font-size: 20px; margin: 0;'>{billing_type}</p>", unsafe_allow_html=True)
 
-    # Prepare input
+    # Prepare input for model
     input_dict = {
         "gender": gender,
         "SeniorCitizen": SeniorCitizen,
@@ -933,132 +993,197 @@ elif page == "🔮 Churn Prediction":
 
     # Prediction Section
     st.markdown("---")
-    st.subheader("🎯 Churn Prediction")
+    st.markdown("### 🎯 Churn Prediction")
 
     if 'model' not in st.session_state or len(st.session_state.model) == 0:
         st.warning("⚠️ No models trained yet. Please go to the ML Models page to train models first.")
     else:
-        col1, col2 = st.columns([2, 1])
-
+        # Create prediction controls with proper alignment
+        col1, col2 = st.columns([3, 1])
+        
         with col1:
             model_option = st.selectbox(
-                "Select Prediction Model:",
+                "Select Prediction Model",
                 st.session_state.model.keys(),
                 help="Choose the machine learning model for prediction"
             )
-
+        
         with col2:
-            predict_button = st.button("🔮 Predict Churn", type="primary", use_container_width=True)
+            st.markdown("<br>", unsafe_allow_html=True)  # Add spacing to align button
+            predict_button = st.button(
+                "🔮 Predict Churn", 
+                type="primary", 
+                use_container_width=True
+            )
 
         if predict_button:
             with st.spinner("Analyzing customer profile..."):
                 # Make prediction
                 prediction = st.session_state.model[model_option].predict(df_input)[0]
                 probability = st.session_state.model[model_option].predict_proba(df_input)[0]
-                print(probability)
-
-                # Display results with enhanced visualization
+                
+                # Display results
                 st.markdown("---")
-                col1, col2, col3 = st.columns([1, 2, 1])
-
+                
+                # Create centered result display
+                col1, col2, col3 = st.columns([1, 3, 1])
+                
                 with col2:
                     if prediction == 1:
                         # High churn risk
                         churn_prob = probability[1]
-                        st.error(f"### ⚠️ HIGH CHURN RISK")
-
-                        # Progress bar for probability
-                        st.progress(float(churn_prob))
-                        st.metric("Churn Probability", f"{churn_prob:.1%}")
-
-                        # Risk factors
-                        st.markdown("#### 🔍 Key Risk Factors:")
+                        
+                        # Alert box
+                        st.error("### ⚠️ HIGH CHURN RISK")
+                        
+                        # Probability display
+                        col_a, col_b = st.columns(2)
+                        with col_a:
+                            st.metric("Churn Probability", f"{churn_prob:.1%}")
+                        with col_b:
+                            st.progress(float(churn_prob))
+                        
+                        # Risk factors in columns
+                        st.markdown("#### 🔍 Key Risk Factors")
                         risk_factors = []
+                        
                         if Contract == "Month-to-month":
-                            risk_factors.append("• Month-to-month contract")
+                            risk_factors.append("Month-to-month contract")
                         if tenure < 12:
-                            risk_factors.append("• New customer (low tenure)")
+                            risk_factors.append("New customer (low tenure)")
                         if "Electronic check" in PaymentMethod:
-                            risk_factors.append("• Electronic check payment")
-                        if InternetService == "Fiber optic":
-                            risk_factors.append("• Fiber optic service issues")
-
-                        for factor in risk_factors:
-                            st.write(factor)
-
+                            risk_factors.append("Electronic check payment")
+                        if InternetService == "Fiber optic" and services_count < 3:
+                            risk_factors.append("Limited service bundle")
+                        if MonthlyCharges > 80:
+                            risk_factors.append("High monthly charges")
+                        
+                        # Display risk factors in a clean list
+                        for i, factor in enumerate(risk_factors, 1):
+                            st.write(f"{i}. {factor}")
+                        
                         # Recommendations
-                        st.markdown("#### 💡 Retention Recommendations:")
-                        st.info("""
-                        1. **Immediate Action**: Personal call from retention specialist
-                        2. **Offer**: Contract upgrade with 20% discount for 6 months
-                        3. **Support**: Free tech support for 3 months
-                        4. **Payment**: Assistance switching to auto-pay with incentive
-                        """)
-
+                        st.markdown("#### 💡 Retention Recommendations")
+                        
+                        rec_col1, rec_col2 = st.columns(2)
+                        with rec_col1:
+                            st.info("""
+                            **Immediate Actions:**
+                            - Personal retention call
+                            - Contract upgrade offer
+                            - 20% discount for 6 months
+                            """)
+                        
+                        with rec_col2:
+                            st.info("""
+                            **Support Offerings:**
+                            - Free tech support (3 months)
+                            - Payment method assistance
+                            - Service bundle discount
+                            """)
+                    
                     else:
                         # Low churn risk
                         retain_prob = probability[0]
-                        st.success(f"### ✅ LOW CHURN RISK")
-
-                        # Progress bar for retention probability
-                        st.progress(float(retain_prob))
-                        st.metric("Retention Probability", f"{retain_prob:.1%}")
-
+                        
+                        # Success box
+                        st.success("### ✅ LOW CHURN RISK")
+                        
+                        # Probability display
+                        col_a, col_b = st.columns(2)
+                        with col_a:
+                            st.metric("Retention Probability", f"{retain_prob:.1%}")
+                        with col_b:
+                            st.progress(float(retain_prob))
+                        
                         # Positive factors
-                        st.markdown("#### 💚 Positive Indicators:")
+                        st.markdown("#### 💚 Positive Indicators")
                         positive_factors = []
+                        
                         if Contract in ["One year", "Two year"]:
-                            positive_factors.append("• Long-term contract")
+                            positive_factors.append("Long-term contract commitment")
                         if tenure > 24:
-                            positive_factors.append("• Loyal customer")
+                            positive_factors.append("Loyal customer (high tenure)")
                         if "automatic" in PaymentMethod:
-                            positive_factors.append("• Auto-payment setup")
-
-                        for factor in positive_factors:
-                            st.write(factor)
-
+                            positive_factors.append("Automatic payment setup")
+                        if services_count >= 4:
+                            positive_factors.append("Strong service bundle")
+                        
+                        # Display positive factors
+                        for i, factor in enumerate(positive_factors, 1):
+                            st.write(f"{i}. {factor}")
+                        
                         # Retention strategy
-                        st.markdown("#### 🎯 Retention Strategy:")
-                        st.info("""
-                        1. **Maintain**: Regular check-ins every quarter
-                        2. **Reward**: Loyalty program enrollment
-                        3. **Upsell**: Offer premium services at discount
-                        4. **Engage**: Include in beta programs and surveys
-                        """)
-
+                        st.markdown("#### 🎯 Retention Strategy")
+                        
+                        strat_col1, strat_col2 = st.columns(2)
+                        with strat_col1:
+                            st.info("""
+                            **Engagement:**
+                            - Quarterly check-ins
+                            - Loyalty rewards program
+                            - Beta program access
+                            """)
+                        
+                        with strat_col2:
+                            st.info("""
+                            **Growth Opportunities:**
+                            - Premium service offers
+                            - Referral incentives
+                            - Exclusive discounts
+                            """)
+                
                 # Additional insights
                 st.markdown("---")
                 with st.expander("📊 View Detailed Analysis"):
-                    # Feature importance for this prediction (if available)
-                    st.markdown("#### Feature Contributions")
-
-                    # Create a simple bar chart of input features
+                    st.markdown("#### Feature Contributions to Prediction")
+                    
+                    # Create risk assessment visualization
                     feature_values = {
-                        "Tenure": tenure / 72,
+                        "Tenure": (72 - tenure) / 72,  # Inverted - lower tenure = higher risk
                         "Monthly Charges": MonthlyCharges / 120,
-                        "Total Charges": min(TotalCharges / 5000, 1),
-                        "Contract Risk": 0.8 if Contract == "Month-to-month" else 0.2,
-                        "Payment Risk": 0.7 if "check" in PaymentMethod else 0.3,
-                        "Service Bundle": services_count / 6 if InternetService != "No" else 0
+                        "Total Charges": 1 - min(TotalCharges / 5000, 1),  # Inverted
+                        "Contract Risk": 1.0 if Contract == "Month-to-month" else (0.5 if Contract == "One year" else 0.1),
+                        "Payment Risk": 0.8 if "Electronic check" in PaymentMethod else (0.6 if "Mailed check" in PaymentMethod else 0.2),
+                        "Service Bundle": 1 - (services_count / 6) if InternetService != "No" else 0.5
                     }
-
+                    
+                    # Create horizontal bar chart
                     fig = go.Figure(data=[
                         go.Bar(
                             x=list(feature_values.values()),
                             y=list(feature_values.keys()),
                             orientation='h',
-                            marker_color=['red' if v > 0.5 else 'green' for v in feature_values.values()]
+                            marker_color=['#ff4444' if v > 0.6 else '#ffaa00' if v > 0.3 else '#44ff44' 
+                                        for v in feature_values.values()],
+                            text=[f'{v:.0%}' for v in feature_values.values()],
+                            textposition='auto',
                         )
                     ])
+                    
                     fig.update_layout(
                         title="Risk Factor Analysis",
                         xaxis_title="Risk Level",
                         yaxis_title="Features",
                         showlegend=False,
-                        height=300
+                        height=400,
+                        xaxis=dict(range=[0, 1], tickformat='.0%'),
+                        margin=dict(l=20, r=20, t=40, b=20)
                     )
+                    
                     st.plotly_chart(fig, use_container_width=True)
-
+                    
+                    # Summary statistics
+                    col1, col2, col3 = st.columns(3)
+                    with col1:
+                        avg_risk = sum(feature_values.values()) / len(feature_values)
+                        st.metric("Average Risk Score", f"{avg_risk:.1%}")
+                    with col2:
+                        high_risk_factors = sum(1 for v in feature_values.values() if v > 0.6)
+                        st.metric("High Risk Factors", high_risk_factors)
+                    with col3:
+                        model_confidence = max(probability)
+                        st.metric("Model Confidence", f"{model_confidence:.1%}")
 elif page == "💡 Recommendations":
     st.title("💡 Strategic Recommendations")
 
