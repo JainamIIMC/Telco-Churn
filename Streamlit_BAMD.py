@@ -245,6 +245,7 @@ elif page == "🔍 Exploratory Analysis":
     st.title("🔍 Exploratory Data Analysis")
 
     df = load_data()
+    df = preprocess_data(df)
 
     # Create tabs for different analyses
     tab1, tab2, tab3, tab4 = st.tabs(["Demographics", "Services", "Financial", "Correlations"])
@@ -381,7 +382,7 @@ elif page == "🔍 Exploratory Analysis":
             )
             st.plotly_chart(fig, use_container_width=True)
         else:
-            st.info("No service columns found to plot.")
+            st.info("No service columns found to plot.")
 
     with tab3:
         st.subheader("💰 Financial Analysis")
