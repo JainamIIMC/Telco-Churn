@@ -77,7 +77,15 @@ if 'model' not in st.session_state:
 
 # Sidebar for navigation
 st.sidebar.title("🧭 Navigation")
-page = st.sidebar.radio(
+st.sidebar.markdown("""
+<style>
+    .stSelectbox > div > div {
+        width: 100% !important;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+page = st.sidebar.selectbox(
     "Go to",
     ["🏠 Home", "📊 Data Overview", "🔍 Exploratory Analysis",
      "🎯 Customer Insights", "🤖 ML Models", "📈 Model Comparison", "🔮 Churn Prediction",
