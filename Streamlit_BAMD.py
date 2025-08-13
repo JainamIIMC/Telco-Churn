@@ -76,22 +76,74 @@ if 'model' not in st.session_state:
     st.session_state.model = {}
 
 # Sidebar for navigation
-st.sidebar.title("🧭 Navigation")
-st.sidebar.markdown("""
+st.markdown("""
 <style>
-    .stSelectbox > div > div {
-        width: 100% !important;
+    /* Style for sidebar buttons to look like panels */
+    .stSidebar > div > div > div > div > button {
+        background-color: #f0f2f6;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin: 4px 0;
+        width: 100%;
+        text-align: left;
+        font-size: 14px;
+        font-weight: 500;
+        color: #262730;
+        transition: all 0.3s ease;
+        min-height: 45px;
+        display: flex;
+        align-items: center;
+    }
+    
+    .stSidebar > div > div > div > div > button:hover {
+        background-color: #e0e2e6;
+        border-color: #c0c0c0;
+        transform: translateX(2px);
+    }
+    
+    .stSidebar > div > div > div > div > button:focus {
+        background-color: #4a5568;
+        color: white;
+        border-color: #4a5568;
+        box-shadow: 0 0 0 2px rgba(74, 85, 104, 0.2);
+    }
+    
+    /* Alternative using custom class for selected state */
+    .selected-panel {
+        background-color: #4a5568 !important;
+        color: white !important;
+        border-color: #4a5568 !important;
     }
 </style>
 """, unsafe_allow_html=True)
 
-page = st.sidebar.selectbox(
-    "Go to",
-    ["🏠 Home", "📊 Data Overview", "🔍 Exploratory Analysis",
-     "🎯 Customer Insights", "💻 ML Models", "📈 Model Comparison", "🔮 Churn Prediction",
-     "💡 Recommendations"]
-)
+# Initialize session state for page selection
+if 'selected_page' not in st.session_state:
+    st.session_state.selected_page = "🏠 Home"
 
+# Sidebar title
+st.sidebar.title("🧭 Navigation")
+
+# Define pages
+page = [
+    "🏠 Home",
+    "📊 Data Overview",
+    "🔍 Exploratory Analysis",
+    "🎯 Customer Insights",
+    "💻 ML Models",
+    "📈 Model Comparison",
+    "🔮 Churn Prediction",
+    "💡 Recommendations"
+]
+
+# Create panel buttons
+for page in page:
+    if st.sidebar.button(page, key=f"nav_{page}", use_container_width=True):
+        st.session_state.selected_page = page
+
+# Get the selected page
+page = st.session_state.selected_page
 
 # Load data function
 @st.cache_data
