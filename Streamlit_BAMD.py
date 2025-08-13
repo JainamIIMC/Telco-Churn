@@ -88,7 +88,7 @@ st.sidebar.markdown("""
 page = st.sidebar.selectbox(
     "Go to",
     ["🏠 Home", "📊 Data Overview", "🔍 Exploratory Analysis",
-     "🎯 Customer Insights", "🤖 ML Models", "📈 Model Comparison", "🔮 Churn Prediction",
+     "🎯 Customer Insights", "💻 ML Models", "📈 Model Comparison", "🔮 Churn Prediction",
      "💡 Recommendations"]
 )
 
@@ -453,8 +453,8 @@ elif page == "🎯 Customer Insights":
     # TODO: Add customer lifetime value analysis
     st.info("📌 TODO: Add Customer Lifetime Value (CLV) analysis and profitability segments")
 
-elif page == "🤖 ML Models":
-    st.title("🤖 Machine Learning Models")
+elif page == "💻 ML Models":
+    st.title("💻 Machine Learning Models")
 
     df = load_data()
     df_processed = preprocess_data(df)
