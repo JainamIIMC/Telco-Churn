@@ -368,16 +368,16 @@ elif page == "🔍 Exploratory Analysis":
             
             for service in present:
                 # Simple approach: treat anything that's not "No" as having the service
-                has_service = df[service] != "No"
+                has_service = df[service] != 0
                 service_users = df[has_service]
                 
                 if len(service_users) > 0:
-                    churn_rate = (service_users["Churn"] == "Yes").mean() * 100
-                    churn_rates.append({"Service": service, "Churn_Rate": round(churn_rate, 1)})
+                    churn_rate = (service_users["Churn"] == 1).mean() * 100
+                    churn_rates.append({"Service": service, "Churn_Rate": churn_rate})
             
             # Create DataFrame and sort by churn rate
             service_df = pd.DataFrame(churn_rates).sort_values("Churn_Rate", ascending=True)
-            
+
             # Create horizontal bar chart
             fig = px.bar(service_df, 
                         x="Churn_Rate", 
