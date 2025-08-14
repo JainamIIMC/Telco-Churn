@@ -297,7 +297,7 @@ elif page == "🔍 Exploratory Analysis":
     st.title("🔍 Exploratory Data Analysis")
 
     df = load_data()
-    df = preprocess_data(df)
+    df_processed = preprocess_data(df)
 
     # Create tabs for different analyses
     tab1, tab2, tab3, tab4 = st.tabs(["Demographics", "Services", "Financial", "Correlations"])
@@ -368,11 +368,11 @@ elif page == "🔍 Exploratory Analysis":
             
             for service in present:
                 # Simple approach: treat anything that's not "No" as having the service
-                has_service = df[service] != 0
+                has_service = df[service] != "No"
                 service_users = df[has_service]
                 
                 if len(service_users) > 0:
-                    churn_rate = (service_users["Churn"] == 1).mean() * 100
+                    churn_rate = (service_users["Churn"] == "Yes").mean() * 100
                     churn_rates.append({"Service": service, "Churn_Rate": churn_rate})
             
             # Create DataFrame and sort by churn rate
@@ -416,7 +416,7 @@ elif page == "🔍 Exploratory Analysis":
             st.plotly_chart(fig, use_container_width=True)
 
         # Tenure Analysis
-        fig = px.box(df, x='Churn', y='tenure',
+        fig = px.box(df_processed, x='Churn', y='tenure',
                      title="Customer Tenure by Churn Status",
                      color='Churn',
                      color_discrete_map={'Yes': '#FF6B6B', 'No': '#4ECDC4'})
