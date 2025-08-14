@@ -386,7 +386,7 @@ elif page == "🔍 Exploratory Analysis":
                         title="Churn Rate by Service Type",
                         labels={"Churn_Rate": "Churn Rate (%)", "Service": "Service"},
                         color="Churn_Rate",
-                        color_continuous_scale=['#4ECDC4','#FF6B6B' ])
+                        color_continuous_scale=[(0,'#4ECDC4'),(1,'#FF6B6B') ])
             
 
             fig.update_layout(showlegend=False,
