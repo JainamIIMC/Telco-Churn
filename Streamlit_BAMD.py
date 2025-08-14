@@ -411,12 +411,12 @@ elif page == "🔍 Exploratory Analysis":
             st.plotly_chart(fig, use_container_width=True)
 
         with col2:
-            fig = px.box(df, x='Churn', y='TotalCharges',
+            fig = px.box(df_processed, x='Churn', y='TotalCharges',
                          title="Total Charges by Churn Status")
             st.plotly_chart(fig, use_container_width=True)
 
         # Tenure Analysis
-        fig = px.box(df_processed, x='Churn', y='tenure',
+        fig = px.box(df, x='Churn', y='tenure',
                      title="Customer Tenure by Churn Status",
                      color='Churn',
                      color_discrete_map={'Yes': '#FF6B6B', 'No': '#4ECDC4'})
