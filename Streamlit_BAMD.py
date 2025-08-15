@@ -1783,27 +1783,128 @@ st.markdown("""
 
 with st.sidebar:
     st.markdown("---")
-    st.markdown("### 📚 Resources")
+    # Real-time Monitoring Section
+    st.markdown("### 🔔 Real-time Monitoring")
+    
+    # Alert Settings with better UI
+    alert_enabled = st.toggle("Enable Live Alerts", value=True)
+    
+    if alert_enabled:
+        # Alert threshold slider
+        alert_threshold = st.select_slider(
+            "Alert Priority Level",
+            options=["All", "High", "Critical"],
+            value="High",
+            help="Set minimum priority for notifications"
+        )
+        
+        # Simulated real-time alerts with better styling
+        if alert_threshold in ["All", "High", "Critical"]:
+            st.markdown("""
+            <div style='background-color: #ff44441a; border-left: 3px solid #ff4444; 
+                        padding: 10px; border-radius: 5px; margin: 10px 0;'>
+                <b style='color: #ff4444;'>⚠️ Critical Alert</b><br>
+                <small>23 high-value customers showing churn signals</small><br>
+                <small style='color: #888;'>2 minutes ago</small>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        if alert_threshold == "All":
+            st.markdown("""
+            <div style='background-color: #4444ff1a; border-left: 3px solid #4444ff; 
+                        padding: 10px; border-radius: 5px; margin: 10px 0;'>
+                <b style='color: #4444ff;'>ℹ️ Info Update</b><br>
+                <small>Weekly retention report ready</small><br>
+                <small style='color: #888;'>15 minutes ago</small>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            st.markdown("""
+            <div style='background-color: #44ff441a; border-left: 3px solid #44ff44; 
+                        padding: 10px; border-radius: 5px; margin: 10px 0;'>
+                <b style='color: #44aa44;'>✅ Success</b><br>
+                <small>5 customers retained via intervention</small><br>
+                <small style='color: #888;'>1 hour ago</small>
+            </div>
+            """, unsafe_allow_html=True)
+    
+    st.markdown("---")
+    
+    # Resources Section with expandable content
+    st.markdown("### 📚 Resources & Tools")
+    
+    with st.expander("🔗 External Resources"):
+        st.markdown("""
+        • [Industry Benchmarks (India — TRAI)](https://www.trai.gov.in/release-publication/reports/telecom-subscriptions-reports)  
+        • [Telecom Analytics Blog (Opensignal Market Insights)](https://www.opensignal.com/market-insights)  
+        • [Partner Portal (AWS for Telecom — Partners)](https://aws.amazon.com/telecom/partners/)  
+        • [Training Platform (Coursera: PySpark Churn Analysis)](https://www.coursera.org/projects/machine-learning-with-pyspark-customer-churn-analysis)
+        """)
+        st.caption("Last updated: January 2024")
+    
+    with st.expander("📖 Documentation"):
+        st.markdown("""
+        • [Churn Model Guide (AWS SageMaker)](https://aws.amazon.com/blogs/machine-learning/build-tune-and-deploy-an-end-to-end-churn-prediction-model-using-amazon-sagemaker-pipelines/)  
+        • [API Documentation (FastAPI — Interactive Docs)](https://fastapi.tiangolo.com/)  
+        • [Best Practices (REST API Design — Microsoft)](https://learn.microsoft.com/en-us/azure/architecture/best-practices/api-design)  
+        • [Video Tutorials (End-to-End Telecom Churn in Python)](https://www.youtube.com/watch?v=_jjose2g85c)
+        """)
+        st.caption("Last updated: January 2024")
+        # Add download button for templates
+        st.download_button(
+            label="⬇️ Download All Templates",
+            data="Template files would be here",
+            file_name="churn_templates.zip",
+            mime="application/zip",
+            use_container_width=True
+        )
+    
+    with st.expander("📊 Reports & Templates"):
+        st.markdown("""
+        • [Monthly Report Template (Cohort/Churn Spreadsheet — Andrew Chen)](https://andrewchen.com/the-easiest-spreadsheet-for-churn-mrr-and-cohort-analysis-guest-post/)  
+        • [Executive Dashboard (SaaS Churn Dashboards — Databox)](https://databox.com/dashboard-examples/saas-churn)  
+        • [Segment Analysis (Looker Studio Churn Template)](https://gaillereports.com/looker-studio-customer-churn-analysis-template-for-saas-and-e-commerce/)  
+        • [ROI Calculator (HubSpot CLV Calculators)](https://offers.hubspot.com/customer-lifetime-calculators)
+        """)
+    st.markdown("---")
+    
+    # Team Collaboration Section
+    st.markdown("### 👥 Team Activity")
+    
+    # Recent activity feed
     st.markdown("""
-    - Churn Management Best Practices
-    - Industry Benchmarks
-    - Technical Documentation
+    <div style='background-color: #f8f9fa; padding: 10px; border-radius: 8px;'>
+        <div style='margin-bottom: 8px;'>
+            <b>Abhishek Acharya</b> <small style='color: #888;'>• 10 min ago</small><br>
+            <small>Crafted EDA Graphs</small>
+        </div>
+        <div style='margin-bottom: 8px;'>
+            <b>Jainam Rita</b> <small style='color: #888;'>• 1 hour ago</small><br>
+            <small>Debugged 10 issues</small>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("---")
+    
+    # Support Section with better contact options
+    st.markdown("### 💬 Need Help?")
+    st.markdown("""
+    **Other Channels:**
+    - 📧 analytics@bamd.com
+    - 💬 Slack: #churn-analytics
+    - 📞 1-800-ANALYTICS
+    - 📅 [Book Office Hours](#)
     """)
+    
 
     st.markdown("---")
-    st.markdown("### 🔔 Notifications")
-
-    # Simulated alerts
-    if st.checkbox("Enable Real-time Alerts"):
-        st.warning("⚠️ 23 customers at high risk today")
-        st.info("ℹ️ 5 successful interventions this week")
-
-    st.markdown("---")
-    st.markdown("### 📞 Support")
+    
+    # Footer with version and status
     st.markdown("""
-    **Need Help?**
-    - Email: analytics@telecom.com
-    - Slack: #churn-analytics
-    - Ext: 1234
-    """)
-
+    <div style='text-align: center; color: #888; font-size: 12px; margin-top: 20px;'>
+        <b>Churn Analytics Platform</b><br>
+        Version 2.4.1 • All Systems Operational ✅<br>
+        Last sync: <span id='time'>2 min ago</span>
+    </div>
+    """, unsafe_allow_html=True)
